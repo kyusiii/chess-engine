@@ -1,6 +1,6 @@
-import { Cell } from "./cell";
-import { BoardDimensions } from "./constants";
-import { Piece } from "./piece";
+import { Cell } from "./types/cell";
+import { BoardDimensions, DefaultBoard } from "./constants";
+
 export class Chess {
     board: Cell[][];
 
@@ -15,19 +15,14 @@ export class Chess {
         for (let x=0; x<BoardDimensions.x; x++) {
             newBoard[x] = [];
             for (let y=0; y<BoardDimensions.y; y++) {
-                let newPiece: Piece = {
-                    name: "rock",
-                    chessNotation: "R",
-                    availableMovements: [],
-                    specialMovements: [],
-                    x: x,
-                    y: y
-                };
+                const defaultPiece = DefaultBoard[x][y];
+                defaultPiece.x = x;
+                defaultPiece.y = y;
 
                 let newCell: Cell = {
                     chessNotation: this.numberToLetter(x) + y,
                     color: tempCellCounter%2,
-                    currentPiece: newPiece,
+                    currentPiece: defaultPiece,
                     xBoardPos: x,
                     yBoardPos: y
                 };
