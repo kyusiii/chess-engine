@@ -1,5 +1,8 @@
 import { Cell } from "./types/cell";
-import { BoardDimensions, DefaultBoard } from "./constants";
+import { BoardDimensions, CampColors, DefaultBoard, DefaultPieces } from "./constants";
+import { Piece } from "./types/piece";
+import { Position } from "./types/position";
+import { Movement, MovementType } from "./types/movement";
 
 export class Chess {
     board: Cell[][];
@@ -16,15 +19,13 @@ export class Chess {
             newBoard[x] = [];
             for (let y=0; y<BoardDimensions.y; y++) {
                 const defaultPiece = DefaultBoard[x][y];
-                defaultPiece.x = x;
-                defaultPiece.y = y;
+                defaultPiece.position = {x: y, y: x};
 
                 let newCell: Cell = {
-                    chessNotation: this.numberToLetter(x) + y,
+                    chessNotation: this.numberToLetter(y) + x,
                     color: tempCellCounter%2,
                     currentPiece: defaultPiece,
-                    xBoardPos: x,
-                    yBoardPos: y
+                    position: {x: y, y: x}
                 };
 
                 newBoard[x][y] = newCell;
@@ -39,9 +40,9 @@ export class Chess {
     printBoard(): void {
         let toPrint = "";
         
-        for (let x=0; x<BoardDimensions.x; x++) {
+        for (let x=BoardDimensions.x-1; x>=0; x--) {
             for (let y=0; y<BoardDimensions.y; y++) {
-                toPrint += (" (" + this.board[x][y].chessNotation + ", " + this.board[x][y].currentPiece.name + ") ");
+                toPrint += (" (" + this.board[x][y].chessNotation + ", " + this.board[x][y].currentPiece.chessNotation + ", " + y + " " + x +") ");
             }
 
             toPrint += "\n";
@@ -50,6 +51,239 @@ export class Chess {
         console.log(toPrint);
     }
 
+    calculateAvailablesMoves(piece: Piece): Movement[] {
+        let moves: Movement[] = [];
+
+        if (piece.chessNotation == "P") {
+            if (!piece.hasMoved) {
+                moves.push({
+                    to: {x: piece.position.x, y: piece.position.y + 2},
+                    type: MovementType.DEFAULT 
+                });
+            }
+
+            let takablePieces = this.getTakablePiecesByPawn(piece);
+            if (takablePieces && takablePieces.length > 0) {
+                moves = moves.concat(takablePieces);
+            }
+        }
+
+        piece.availableMovements.forEach((mov: string) => {
+            switch(mov) {
+                case "lines":
+                    for (let x=1; x <= BoardDimensions.x+1; x++) {
+                        let targetPos: Position = {x: piece.position.x + x, y:piece.position.y};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.XLINERIGHT}
+
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+
+                    for (let x=1; x <= BoardDimensions.x+1; x++) {
+                        let targetPos: Position = {x: piece.position.x - x, y:piece.position.y};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.XLINELEFT}
+
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+
+                    for (let y=1; y <= BoardDimensions.y+1; y++) {
+                        let targetPos: Position = {x: piece.position.x, y:piece.position.y + y};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.YLINEFORW}
+
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+
+                    for (let y=1; y <= BoardDimensions.y+1; y++) {
+                        let targetPos: Position = {x: piece.position.x, y:piece.position.y - y};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.YLINEBACK}
+
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+                    break;
+                case "diags":
+                    for (let x=1; x <= BoardDimensions.x+1; x++) {
+                        let targetPos: Position = {x: piece.position.x + x, y:piece.position.y + x};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.RDIAGFORW}
+
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+
+                    for (let x=1; x <= BoardDimensions.x+1; x++) {
+                        let targetPos: Position = {x: piece.position.x - x, y:piece.position.y - x};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.LDIAGBACK}
+                        
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+
+                    for (let x=1; x <= BoardDimensions.x+1; x++) {
+                        let targetPos: Position = {x: piece.position.x + x, y:piece.position.y - x};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.LDIAGFORW}
+                        
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+
+                    for (let x=1; x <= BoardDimensions.x+1; x++) {
+                        let targetPos: Position = {x: piece.position.x - x, y:piece.position.y + x};
+                        let targetMov: Movement = {to: targetPos, type: MovementType.RDIAGBACK}
+                        
+                        if (this.isAvailableMove(piece, targetMov)) {
+                            moves.push(targetMov);
+                        }
+
+                        if (this.isBlocked(piece, targetMov)) break;
+                    }
+                    break;
+                default:
+                    let a = mov.split(",");
+                    let targetPos: Position = {x: piece.position.x, y:piece.position.y};
+                    let targetMov: Movement = {to: targetPos, type: MovementType.DEFAULT}
+
+                    a.forEach((element: string) => {
+                        let axis = element.charAt(0);
+                        let plusOrMin = element.charAt(1);
+                        let value = element.charAt(2);
+                        
+                        if (axis == "x") {
+                            if (piece.color == CampColors.WHITE) {
+                                if (plusOrMin == "+") {
+                                    targetPos.x = targetPos.x + Number.parseInt(value);
+                                }
+                                else {
+                                    targetPos.x = targetPos.x - Number.parseInt(value);
+                                }
+                            }
+                            else {
+                                if (plusOrMin == "+") {
+                                    targetPos.x = targetPos.x - Number.parseInt(value);
+                                }
+                                else {
+                                    targetPos.x = targetPos.x + Number.parseInt(value);
+                                }
+                            }
+                        }
+                        else {
+                            if (piece.color == CampColors.WHITE) {
+                                if (plusOrMin == "+") {
+                                    targetPos.y = targetPos.y + Number.parseInt(value);
+                                }
+                                else {
+                                    targetPos.y = targetPos.y - Number.parseInt(value);
+                                }
+                            }
+                            else {
+                                if (plusOrMin == "+") {
+                                    targetPos.y = targetPos.y - Number.parseInt(value);
+                                }
+                                else {
+                                    targetPos.y = targetPos.y + Number.parseInt(value);
+                                }
+                            }
+                        }
+                    });
+                        
+                    if (this.isAvailableMove(piece, targetMov)) moves.push(targetMov);
+            }
+        })
+
+        return moves;
+    }
+
+    movePiece(piece: Piece, to: Position) {
+        //if (!this.isAvailableMove(piece, to)) return;
+        
+        //piece to take
+        //this.getBoardCell(piece.position).currentPiece = {...DefaultPieces.NONE, color: null};
+        piece.position = {x: to.x, y: to.y};
+        this.getBoardCell(to).currentPiece = piece;
+    }
+
+    private isAvailableMove(piece: Piece, move: Movement): boolean {
+        if (move.to.x >= BoardDimensions.x || 
+            move.to.x < 0 || 
+            move.to.y >= BoardDimensions.y || 
+            move.to.y < 0)
+        {
+            return false;
+        }
+
+        if (this.isEqualPositions(move.to, piece.position)) return false;
+        if (this.getBoardCell(move.to).currentPiece.chessNotation != "-") return false;
+
+        return true;
+    }
+
+    private isEqualPositions(pos1: Position, pos2: Position) {
+        return pos1.x == pos2.x && pos1.y == pos2.y;
+    }
+
+    getBoardCell(position: Position) {
+        return this.board[position.y][position.x];
+    }
+
+    private isBlocked(piece: Piece, move: Movement) {
+        if (move.to.x >= BoardDimensions.x || 
+            move.to.x < 0 || 
+            move.to.y >= BoardDimensions.y || 
+            move.to.y < 0)
+        {
+            return true;
+        }
+
+        let cell = this.getBoardCell({x: move.to.x, y: move.to.y});
+        return cell.currentPiece.chessNotation != "-";
+    }
+
+    private getTakablePiecesByPawn(piece: Piece): Movement[] | undefined{
+        if (piece.chessNotation != "P") return;
+        
+        let moves: Movement[] = [];
+        let posToTest: Position = {x: piece.position.x + 1, y: piece.position.y + 1};
+
+        let cell = this.getBoardCell(posToTest);
+
+        if (cell.currentPiece.chessNotation != "-" && cell.currentPiece.color != piece.color) moves.push({
+            to: posToTest,
+            type: MovementType.DEFAULT
+        })
+
+        posToTest = {x: piece.position.x - 1, y: piece.position.y + 1}
+        cell = this.getBoardCell(posToTest);
+
+        if (cell.currentPiece.chessNotation != "-" && cell.currentPiece.color != piece.color) moves.push({
+            to: posToTest,
+            type: MovementType.DEFAULT
+        })
+
+        return moves;
+    }
+ 
     private numberToLetter(number: number): string {
         switch(number) {
             case 0: return "A";

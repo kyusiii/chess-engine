@@ -1,9 +1,11 @@
+import { CampColors } from "../constants";
+import { Position } from "./position";
 
 export type Piece = {
     name: string;
     chessNotation: string;
-    x: number;
-    y: number;
-    availableMovements: number[] //exprimed in {+/-fromX, +/-fromY}
-    specialMovements: number[] //exprimed in {+/-fromX, +/-fromY}
+    position: Position;
+    availableMovements: string[];
+    color: CampColors | null;
+    hasMoved: boolean;
 }
