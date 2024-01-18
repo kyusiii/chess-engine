@@ -212,16 +212,22 @@ export class Chess {
             }
         })
 
+        piece.calculateAvailableMovements = moves.map(m => m.to);
         return moves;
     }
 
     movePiece(piece: Piece, to: Position) {
-        //if (!this.isAvailableMove(piece, to)) return;
-        
-        //piece to take
-        //this.getBoardCell(piece.position).currentPiece = {...DefaultPieces.NONE, color: null};
+        if (piece.calculateAvailableMovements && piece.calculateAvailableMovements.find(t => this.isEqualPositions(t, to)) == undefined) {
+            console.log("Cant move ", piece.name, " to ", to, " : not allowed");
+            return;
+        }
+
+        let currentCell = this.getBoardCell(piece.position);
+        let targetCell = this.getBoardCell(to);
+
         piece.position = {x: to.x, y: to.y};
-        this.getBoardCell(to).currentPiece = piece;
+        targetCell.currentPiece = piece;
+        currentCell.currentPiece = {...DefaultPieces.NONE, color: null};
     }
 
     private isAvailableMove(piece: Piece, move: Movement): boolean {
