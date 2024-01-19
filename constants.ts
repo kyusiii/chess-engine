@@ -21,7 +21,7 @@ export const DefaultPieces = {
 
 export const DefaultBoard: Piece[][] = [ //from A1
     [
-        {...DefaultPieces.NONE, color: null},
+        {...DefaultPieces.ROOK, color: CampColors.WHITE},
         {...DefaultPieces.KNIGHT, color: CampColors.WHITE},
         {...DefaultPieces.BISHOP, color: CampColors.WHITE},
         {...DefaultPieces.QUEEN, color: CampColors.WHITE},
@@ -31,7 +31,7 @@ export const DefaultBoard: Piece[][] = [ //from A1
         {...DefaultPieces.ROOK, color: CampColors.WHITE}
     ],
     [
-        {...DefaultPieces.NONE, color: null},
+        {...DefaultPieces.PAWN, color: CampColors.WHITE},
         {...DefaultPieces.PAWN, color: CampColors.WHITE},
         {...DefaultPieces.PAWN, color: CampColors.WHITE},
         {...DefaultPieces.PAWN, color: CampColors.WHITE},
@@ -54,7 +54,7 @@ export const DefaultBoard: Piece[][] = [ //from A1
         {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
-        {...DefaultPieces.QUEEN, color: CampColors.WHITE},
+        {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
@@ -62,7 +62,7 @@ export const DefaultBoard: Piece[][] = [ //from A1
     ],
     [
         {...DefaultPieces.NONE, color: null},
-        {...DefaultPieces.PAWN, color: CampColors.WHITE, hasMoved: true},
+        {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
         {...DefaultPieces.NONE, color: null},
