@@ -5,10 +5,12 @@ import { Position } from "./types/position";
 import { Movement, MovementType } from "./types/movement";
 
 export class Chess {
-    board: Cell[][];
+    private board: Cell[][];
+    private turn: boolean; //true = white
 
     constructor() {
         this.board = this.generateNewBoard();
+        this.turn = true;
     }
 
     generateNewBoard(): Cell[][] {
@@ -22,8 +24,8 @@ export class Chess {
                 defaultPiece.position = {x: y, y: x};
 
                 let newCell: Cell = {
-                    chessNotation: this.numberToLetter(y) + x,
-                    color: tempCellCounter%2,
+                    chessNotation: this.numberToLetter(y) + (BoardDimensions.x-1 - x),
+                    color: (tempCellCounter + x) % 2,
                     currentPiece: defaultPiece,
                     position: {x: y, y: x}
                 };
@@ -37,10 +39,18 @@ export class Chess {
         return newBoard;
     }
 
+    getTurn(): boolean {
+        return this.turn;
+    }
+
+    getBoard(): Cell[][] {
+        return this.board;
+    }
+
     printBoard(): void {
         let toPrint = "";
         
-        for (let x=BoardDimensions.x-1; x>=0; x--) {
+        for (let x=0; x<BoardDimensions.x; x++) {
             for (let y=0; y<BoardDimensions.y; y++) {
                 toPrint += (" (" + this.board[x][y].chessNotation + ", " + this.board[x][y].currentPiece.chessNotation + ", " + y + " " + x +") ");
             }
