@@ -29,10 +29,12 @@ export class Chess {
         defaultPiece.position = { x: y, y: x };
 
         let newCell: Cell = {
+          id: y + x,
           chessNotation: this.numberToLetter(y) + (BoardDimensions.x - 1 - x),
           color: (tempCellCounter + x) % 2,
           currentPiece: defaultPiece,
           position: { x: y, y: x },
+          isAvailable: false,
         };
 
         newBoard[x][y] = newCell;
@@ -73,6 +75,10 @@ export class Chess {
     }
 
     console.log(toPrint);
+  }
+
+  resetGame(): void {
+    this.board = this.generateNewBoard();
   }
 
   calculateAvailablesMoves(piece: Piece): Movement[] {
@@ -326,25 +332,29 @@ export class Chess {
     let targetCell = this.getBoardCell(to);
 
     piece.position = { x: to.x, y: to.y };
+    piece.hasMoved = true;
     targetCell.currentPiece = piece;
     currentCell.currentPiece = { ...DefaultPieces.NONE, color: null };
   }
 
   private isAvailableMove(piece: Piece, move: Movement): boolean {
+    if (this.isOutOfBoard(move)) return false;
+    if (this.isEqualPositions(move.to, piece.position)) return false;
+    if (this.getBoardCell(move.to).currentPiece.chessNotation != "-")
+      return false;
+
+    return true;
+  }
+
+  private isOutOfBoard(move: Movement) {
     if (
       move.to.x >= BoardDimensions.x ||
       move.to.x < 0 ||
       move.to.y >= BoardDimensions.y ||
       move.to.y < 0
     ) {
-      return false;
+      return true;
     }
-
-    if (this.isEqualPositions(move.to, piece.position)) return false;
-    if (this.getBoardCell(move.to).currentPiece.chessNotation != "-")
-      return false;
-
-    return true;
   }
 
   private isEqualPositions(pos1: Position, pos2: Position) {
@@ -356,14 +366,7 @@ export class Chess {
   }
 
   private isBlocked(piece: Piece, move: Movement) {
-    if (
-      move.to.x >= BoardDimensions.x ||
-      move.to.x < 0 ||
-      move.to.y >= BoardDimensions.y ||
-      move.to.y < 0
-    ) {
-      return true;
-    }
+    if (this.isOutOfBoard(move)) return true;
 
     let cell = this.getBoardCell({ x: move.to.x, y: move.to.y });
     return cell.currentPiece.chessNotation != "-";
@@ -412,7 +415,7 @@ export class Chess {
     }
 
     for (let move of movesToTest) {
-      if (!this.isAvailableMove(piece, move)) continue;
+      if (this.isOutOfBoard(move)) continue;
 
       let cell = this.getBoardCell(move.to);
       if (this.hasEnemyPiece(cell, piece)) {
