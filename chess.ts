@@ -340,7 +340,10 @@ export class Chess {
   private isAvailableMove(piece: Piece, move: Movement): boolean {
     if (this.isOutOfBoard(move)) return false;
     if (this.isEqualPositions(move.to, piece.position)) return false;
-    if (this.getBoardCell(move.to).currentPiece.chessNotation != "-")
+    if (
+      this.getBoardCell(move.to).currentPiece.chessNotation != "-" &&
+      this.getBoardCell(move.to).currentPiece.color == piece.color
+    )
       return false;
 
     return true;
