@@ -241,7 +241,7 @@ export class Chess {
             let value = element.charAt(2);
 
             if (axis == "x") {
-              if (piece.color == CampColors.WHITE) {
+              if (piece.color == CampColors.BLACK) {
                 if (plusOrMin == "+") {
                   targetPos.x = targetPos.x + Number.parseInt(value);
                 } else {
@@ -255,7 +255,7 @@ export class Chess {
                 }
               }
             } else {
-              if (piece.color == CampColors.WHITE) {
+              if (piece.color == CampColors.BLACK) {
                 if (plusOrMin == "+") {
                   targetPos.y = targetPos.y + Number.parseInt(value);
                 } else {
@@ -277,7 +277,7 @@ export class Chess {
 
     if (piece.chessNotation == "P") {
       if (!piece.hasMoved) {
-        if (piece.color == CampColors.WHITE) {
+        if (piece.color == CampColors.BLACK) {
           moves.push({
             to: { x: piece.position.x, y: piece.position.y + 2 },
             type: MovementType.DEFAULT,
@@ -298,10 +298,10 @@ export class Chess {
 
     piece.calculateAvailableMovements = moves.map((m) => m.to);
 
-    moves.forEach((move) => {
+    for (let move of moves) {
       let cell = this.getBoardCell(move.to);
       cell.isAvailable = true;
-    });
+    }
 
     return moves;
   }
@@ -381,7 +381,7 @@ export class Chess {
     let moves: Movement[] = [];
     let movesToTest: Movement[] = [];
 
-    if (piece.color == CampColors.WHITE) {
+    if (piece.color == CampColors.BLACK) {
       movesToTest = [
         {
           to: {
