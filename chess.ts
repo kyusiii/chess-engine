@@ -20,7 +20,7 @@ export class Chess {
         for (let x=0; x<BoardDimensions.x; x++) {
             newBoard[x] = [];
             for (let y=0; y<BoardDimensions.y; y++) {
-                const defaultPiece = DefaultBoard[x][y];
+                let defaultPiece = DefaultBoard[x][y];
                 defaultPiece.position = {x: y, y: x};
 
                 let newCell: Cell = {
@@ -61,8 +61,30 @@ export class Chess {
         console.log(toPrint);
     }
 
+    isKingCheckmate(): boolean {
+        const king = this.getPieceByNotation("K");
+        if (!king) return false;
+
+        const moves = this.calculateAvailablesMoves(king);
+        if (moves.length < 1) return true;
+
+        return false;
+    }
+
+    isKingChecked(): boolean {
+        const king = this.getPieceByNotation("K");
+        if (!king) return false;
+
+        if (king.isChecked) return true;
+
+        return false;
+    }
+
     calculateAvailablesMoves(piece: Piece): Movement[] {
         let moves: Movement[] = [];
+
+
+        if (this.isKingChecked() || this.isKingCheckmate()) return [];
 
         if (piece.chessNotation == "P") {
             if (!piece.hasMoved) {
@@ -235,6 +257,12 @@ export class Chess {
         let currentCell = this.getBoardCell(piece.position);
         let targetCell = this.getBoardCell(to);
 
+        if (targetCell.currentPiece.chessNotation == "K") {
+            targetCell.currentPiece.isChecked = true;
+        }
+
+        if (piece.isChecked) piece.isChecked = false;
+
         piece.position = {x: to.x, y: to.y};
         targetCell.currentPiece = piece;
         currentCell.currentPiece = {...DefaultPieces.NONE, color: null};
@@ -261,6 +289,16 @@ export class Chess {
 
     getBoardCell(position: Position) {
         return this.board[position.y][position.x];
+    }
+
+    getPieceByNotation(notation: string): Piece | null {
+        for (let x=0; x<BoardDimensions.x; x++) {
+            for (let y=0; y<BoardDimensions.y; y++) {
+                if (this.board[x][y].currentPiece.chessNotation == notation) return this.board[x][y].currentPiece;
+            }
+        }
+
+        return null;
     }
 
     private isBlocked(piece: Piece, move: Movement) {

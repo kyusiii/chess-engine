@@ -1,5 +1,4 @@
 import { CampColors } from "../constants";
-import { Movement } from "./movement";
 import { Position } from "./position";
 
 export type Piece = {
@@ -10,4 +9,5 @@ export type Piece = {
     calculateAvailableMovements?: Position[];
     color: CampColors | null;
     hasMoved: boolean;
+    isChecked: boolean;
 }
