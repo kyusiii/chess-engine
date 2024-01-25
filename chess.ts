@@ -152,7 +152,7 @@ export class Chess {
   calculateAvailablesMoves(piece: Piece): Movement[] {
     let moves: Movement[] = [];
 
-    //if (this.isKingChecked()) return [];
+    if (this.isKingChecked()) return [];
 
     piece.availableMovements.forEach((mov: string) => {
       switch (mov) {
@@ -295,6 +295,19 @@ export class Chess {
           }
           break;
         default:
+          if (piece.chessNotation == "P") {
+            let nextFrontCell: Cell;
+            if (piece.color == CampColors.BLACK) {
+              nextFrontCell = this.getBoardCell({x: piece.position.x, y: piece.position.y + 1});
+            }
+            else {
+              nextFrontCell = this.getBoardCell({x: piece.position.x, y: piece.position.y - 1});
+            }
+            if (nextFrontCell.currentPiece.chessNotation != "-" && nextFrontCell.currentPiece.color != piece.color) { //if next front cell of pawn has enemy piece
+              break;
+            }
+          }
+
           let a = mov.split(",");
           let targetPos: Position = {
             x: piece.position.x,
@@ -397,10 +410,16 @@ export class Chess {
 
     piece.position = { x: to.x, y: to.y };
     piece.hasMoved = true;
-    this.calculateAvailablesMoves(piece);
 
     targetCell.currentPiece = piece;
     currentCell.currentPiece = { ...DefaultPieces.NONE, color: null };
+
+    for (let x = 0; x < BoardDimensions.x; x++) {
+      for (let y = 0; y < BoardDimensions.y; y++) {
+        let cell = this.getBoardCell({x: x, y: y});
+        this.calculateAvailablesMoves(cell.currentPiece);
+      }
+    }
 
     this.updateAttackedCells();
   }
