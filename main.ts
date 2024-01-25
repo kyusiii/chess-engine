@@ -1,8 +1,7 @@
 import { Chess } from "./chess";
 
-let pos = { x: 1, y: 0 };
+let pos = { x: 0, y: 1 };
 let targetPos = { x: 4, y: 1 };
 let game = new Chess();
 
-game.printBoard();
-game.calculateAvailablesMoves(game.getBoardCell(targetPos).currentPiece);
+game.calculateAvailablesMoves(game.getBoardCell(pos).currentPiece)

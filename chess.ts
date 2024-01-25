@@ -15,6 +15,8 @@ export class Chess {
 
   constructor() {
     this.board = this.generateNewBoard();
+    this.calculeFirstAvailableMoves();
+    this.updateAttackedCells();
     this.turn = true;
   }
 
@@ -35,6 +37,7 @@ export class Chess {
           currentPiece: defaultPiece,
           position: { x: y, y: x },
           isAvailable: false,
+          isUnderAttack: false
         };
 
         newBoard[x][y] = newCell;
@@ -44,6 +47,39 @@ export class Chess {
     }
 
     return newBoard;
+  }
+
+  calculeFirstAvailableMoves() {
+    for (let x = 0; x < BoardDimensions.x; x++) {
+      for (let y = 0; y < BoardDimensions.y; y++) {
+        let cell = this.getBoardCell({ x: x, y: y });
+        this.calculateAvailablesMoves(cell.currentPiece);
+      }
+    }
+  }
+
+  updateAttackedCells() {
+    for (let x = 0; x < BoardDimensions.x; x++) {
+      for (let y = 0; y < BoardDimensions.y; y++) {
+        let cell = this.getBoardCell({ x: x, y: y });
+        cell.isUnderAttack = false;
+      }
+    }
+    
+    for (let x = 0; x < BoardDimensions.x; x++) {
+      for (let y = 0; y < BoardDimensions.y; y++) {
+        let cell = this.getBoardCell({ x: x, y: y });
+        
+        if (cell.chessNotation == "-") continue;
+
+        if (cell.currentPiece.calculateAvailableMovements && cell.currentPiece.calculateAvailableMovements.length > 0) {
+          for (let move of cell.currentPiece.calculateAvailableMovements) {
+            let nextCell = this.getBoardCell(move.to);
+            nextCell.isUnderAttack = true;
+          }
+        }
+      }
+    }
   }
 
   getTurn(): boolean {
@@ -81,44 +117,42 @@ export class Chess {
     this.board = this.generateNewBoard();
   }
 
-    isKingCheckmate(): boolean {
-        const king = this.getPieceByNotation("K");
-        if (!king) return false;
-
-        const moves = this.calculateAvailablesMoves(king);
-        if (moves.length < 1) return true;
-
-        return false;
-    }
-
-    isKingChecked(): boolean {
-        const king = this.getPieceByNotation("K");
-        if (!king) return false;
-
-        if (king.isChecked) return true;
-
-        return false;
-    }
-
-    calculateAvailablesMoves(piece: Piece): Movement[] {
-        let moves: Movement[] = [];
-
-
-        if (this.isKingChecked() || this.isKingCheckmate()) return [];
-
-        if (piece.chessNotation == "P") {
-            if (!piece.hasMoved) {
-                moves.push({
-                    to: {x: piece.position.x, y: piece.position.y + 2},
-                    type: MovementType.DEFAULT 
-                });
-            }
-
-            let takablePieces = this.getTakablePiecesByPawn(piece);
-            if (takablePieces && takablePieces.length > 0) {
-                moves = moves.concat(takablePieces);
-            }
+  isKingCheckmate(): boolean {
+    for (let x = 0; x < BoardDimensions.x; x++) {
+      for (let y = 0; y < BoardDimensions.y; y++) {
+        let piece = this.board[y][x].currentPiece;
+        if (piece.chessNotation == "K") {
+          const moves = this.calculateAvailablesMoves(piece);
+          if (moves.length < 1) return true;
         }
+      }
+    }
+
+    return false;
+  }
+
+  isKingChecked(): boolean {
+    for (let x = 0; x < BoardDimensions.x; x++) {
+      for (let y = 0; y < BoardDimensions.y; y++) {
+        let piece = this.board[y][x].currentPiece;
+        if (piece.chessNotation == "K") {
+          if (piece.isChecked) return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  calculateKingMoves(piece: Piece) {
+    let cell = this.getBoardCell(piece.position);
+
+  }
+ 
+  calculateAvailablesMoves(piece: Piece): Movement[] {
+    let moves: Movement[] = [];
+
+    //if (this.isKingChecked()) return [];
 
     piece.availableMovements.forEach((mov: string) => {
       switch (mov) {
@@ -314,15 +348,19 @@ export class Chess {
     if (piece.chessNotation == "P") {
       if (!piece.hasMoved) {
         if (piece.color == CampColors.BLACK) {
-          moves.push({
+          const move = {
             to: { x: piece.position.x, y: piece.position.y + 2 },
             type: MovementType.DEFAULT,
-          });
+          };
+
+          if (!this.isOutOfBoard(move)) moves.push(move);
         } else {
-          moves.push({
+          const move = {
             to: { x: piece.position.x, y: piece.position.y - 2 },
             type: MovementType.DEFAULT,
-          });
+          };
+
+          if (!this.isOutOfBoard(move)) moves.push(move);
         }
       }
 
@@ -332,51 +370,39 @@ export class Chess {
       }
     }
 
-    piece.calculateAvailableMovements = moves.map((m) => m.to);
-
-    for (let move of moves) {
-      let cell = this.getBoardCell(move.to);
-      cell.isAvailable = true;
-    }
+    piece.calculateAvailableMovements = moves;
 
     return moves;
-  }
-
-  cleanAvailableCells() {
-    for (let x = 0; x < BoardDimensions.x; x++) {
-      for (let y = 0; y < BoardDimensions.y; y++) {
-        let cell = this.getBoardCell({ x: x, y: y });
-        if (cell.isAvailable) {
-          cell.isAvailable = false;
-        }
-      }
-    }
   }
 
   movePiece(piece: Piece, to: Position) {
     if (
       piece.calculateAvailableMovements &&
       piece.calculateAvailableMovements.find((t) =>
-        this.isEqualPositions(t, to)
+        this.isEqualPositions(t.to, to)
       ) == undefined
     ) {
       console.log("Cant move ", piece.name, " to ", to, " : not allowed");
       return;
     }
 
-        let currentCell = this.getBoardCell(piece.position);
-        let targetCell = this.getBoardCell(to);
+    let currentCell = this.getBoardCell(piece.position);
+    let targetCell = this.getBoardCell(to);
 
-        if (targetCell.currentPiece.chessNotation == "K") {
-            targetCell.currentPiece.isChecked = true;
-        }
+    if (targetCell.currentPiece.chessNotation == "K") {
+      targetCell.currentPiece.isChecked = true;
+    }
 
-        if (piece.isChecked) piece.isChecked = false;
+    if (piece.isChecked) piece.isChecked = false;
 
     piece.position = { x: to.x, y: to.y };
     piece.hasMoved = true;
+    this.calculateAvailablesMoves(piece);
+
     targetCell.currentPiece = piece;
     currentCell.currentPiece = { ...DefaultPieces.NONE, color: null };
+
+    this.updateAttackedCells();
   }
 
   private isAvailableMove(piece: Piece, move: Movement): boolean {
@@ -406,19 +432,20 @@ export class Chess {
     return pos1.x == pos2.x && pos1.y == pos2.y;
   }
 
-    getBoardCell(position: Position) {
-        return this.board[position.y][position.x];
+  getBoardCell(position: Position) {
+    return this.board[position.y][position.x];
+  }
+
+  getPieceByNotation(notation: string): Piece | null {
+    for (let x = 0; x < BoardDimensions.x; x++) {
+      for (let y = 0; y < BoardDimensions.y; y++) {
+        if (this.board[y][x].currentPiece.chessNotation == notation)
+          return this.board[y][x].currentPiece;
+      }
     }
 
-    getPieceByNotation(notation: string): Piece | null {
-        for (let x=0; x<BoardDimensions.x; x++) {
-            for (let y=0; y<BoardDimensions.y; y++) {
-                if (this.board[x][y].currentPiece.chessNotation == notation) return this.board[x][y].currentPiece;
-            }
-        }
-
-        return null;
-    }
+    return null;
+  }
 
   private isBlocked(piece: Piece, move: Movement) {
     if (this.isOutOfBoard(move)) return true;

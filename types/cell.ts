@@ -9,4 +9,5 @@ export type Cell = {
   position: Position;
   color: CampColors;
   isAvailable: boolean;
+  isUnderAttack: boolean;
 };

@@ -11,13 +11,13 @@ export const BoardDimensions = {
 };
 
 export const DefaultPieces = {
-    ROOK: {name: "rook", chessNotation: "R", isChecked: false, hasMoved: false, availableMovements: ["lines"], position: {x: 0, y: 0}},
-    KNIGHT: {name: "knight", chessNotation: "N", isChecked: false, hasMoved: false, availableMovements: ["x-1,y+2", "x+1,y+2", "x-1,y-2", "x+1,y-2"], position: {x: 0, y: 0}},
-    BISHOP: {name: "bishop", chessNotation: "B", isChecked: false, hasMoved: false, availableMovements: ["diags"], position: {x: 0, y: 0}},
-    QUEEN: {name: "queen", chessNotation: "Q", isChecked: false, hasMoved: false, availableMovements: ["lines", "diags"], position: {x: 0, y: 0}},
-    KING: {name: "king", chessNotation: "K", isChecked: false, hasMoved: false, availableMovements: ["x+1", "x-1", "y+1", "y-1", "x+1,y+1", "x-1,y+1", "x-1,y-1", "x+1,y-1"], position: {x: 0, y: 0}},
-    PAWN: {name: "pawn", chessNotation: "P", isChecked: false, hasMoved: false, availableMovements: ["y+1"], position: {x: 0, y: 0}},
-    NONE: {name: "none", chessNotation: "-", isChecked: false, hasMoved: false, availableMovements: [], position: {x: 0, y: 0}}
+    ROOK: {name: "rook", chessNotation: "R", isChecked: false, color: null, hasMoved: false, availableMovements: ["lines"], position: {x: 0, y: 0}},
+    KNIGHT: {name: "knight", chessNotation: "N", isChecked: false, color: null, hasMoved: false, availableMovements: ["x-1,y+2", "x+1,y+2", "x-1,y-2", "x+1,y-2"], position: {x: 0, y: 0}},
+    BISHOP: {name: "bishop", chessNotation: "B", isChecked: false, color: null, hasMoved: false, availableMovements: ["diags"], position: {x: 0, y: 0}},
+    QUEEN: {name: "queen", chessNotation: "Q", isChecked: false, color: null, hasMoved: false, availableMovements: ["lines", "diags"], position: {x: 0, y: 0}},
+    KING: {name: "king", chessNotation: "K", isChecked: false, color: null, hasMoved: false, availableMovements: ["x+1", "x-1", "y+1", "y-1", "x+1,y+1", "x-1,y+1", "x-1,y-1", "x+1,y-1"], position: {x: 0, y: 0}},
+    PAWN: {name: "pawn", chessNotation: "P", isChecked: false, color: null, hasMoved: false, availableMovements: ["y+1"], position: {x: 0, y: 0}},
+    NONE: {name: "none", chessNotation: "-", isChecked: false, color: null, hasMoved: false, availableMovements: [], position: {x: 0, y: 0}}
 }
 
 export const DefaultBoard: Piece[][] = [
@@ -43,44 +43,44 @@ export const DefaultBoard: Piece[][] = [
     { ...DefaultPieces.PAWN, color: CampColors.BLACK },
   ],
   [
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null}
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE}
   ],
   [
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null}
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE}
   ],
   [
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null}
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE}
   ],
   [
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null},
-    {...DefaultPieces.NONE, color: null}
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE}
   ],
   [
     { ...DefaultPieces.PAWN, color: CampColors.WHITE },
