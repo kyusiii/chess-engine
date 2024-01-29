@@ -8,16 +8,17 @@ import {
 import { Piece } from "./types/piece";
 import { Position } from "./types/position";
 import { Movement, MovementType } from "./types/movement";
+import { State } from "./types/state";
 
 export class Chess {
   private board: Cell[][];
-  private turn: boolean; //true = white
+  private turn: CampColors;
 
   constructor() {
     this.board = this.generateNewBoard();
-    this.calculeFirstAvailableMoves();
+    this.turn = CampColors.WHITE;
+    this.calculeFirstAvailableMoves(true);
     this.updateAttackedCells();
-    this.turn = true;
   }
 
   generateNewBoard(): Cell[][] {
@@ -49,11 +50,11 @@ export class Chess {
     return newBoard;
   }
 
-  calculeFirstAvailableMoves() {
+  calculeFirstAvailableMoves(isInit: boolean = false) {
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         let cell = this.getBoardCell({ x: x, y: y });
-        this.calculateAvailablesMoves(cell.currentPiece);
+        this.calculateAvailablesMoves(cell.currentPiece, isInit);
       }
     }
   }
@@ -82,12 +83,24 @@ export class Chess {
     }
   }
 
-  getTurn(): boolean {
+  getTurn(): CampColors {
     return this.turn;
   }
 
-  getBoard(): Cell[][] {
+  getState(): State {
+    return {
+      board: this.getBoard(),
+      turn: this.turn
+    }
+  }
+
+  private getBoard(): Cell[][] {
     return this.board;
+  }
+
+  setOppositeTurn(): void {
+    if (this.turn == CampColors.BLACK) this.turn = CampColors.WHITE;
+    else this.turn = CampColors.BLACK;
   }
 
   printBoard(): void {
@@ -149,8 +162,10 @@ export class Chess {
 
   }
  
-  calculateAvailablesMoves(piece: Piece): Movement[] {
+  calculateAvailablesMoves(piece: Piece, isInit: boolean = false): Movement[] {
     let moves: Movement[] = [];
+
+    if (piece.color != this.turn && !isInit) return [];
 
     if (this.isKingChecked()) return [];
 
@@ -414,6 +429,8 @@ export class Chess {
     targetCell.currentPiece = piece;
     currentCell.currentPiece = { ...DefaultPieces.NONE, color: null };
 
+    this.setOppositeTurn();
+    
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         let cell = this.getBoardCell({x: x, y: y});
