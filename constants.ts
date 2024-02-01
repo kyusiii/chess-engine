@@ -12,7 +12,7 @@ export const BoardDimensions = {
 
 export const DefaultPieces = {
     ROOK: {name: "rook", chessNotation: "R", isChecked: false, color: null, hasMoved: false, availableMovements: ["lines"], position: {x: 0, y: 0}},
-    KNIGHT: {name: "knight", chessNotation: "N", isChecked: false, color: null, hasMoved: false, availableMovements: ["x-1,y+2", "x+1,y+2", "x-1,y-2", "x+1,y-2"], position: {x: 0, y: 0}},
+    KNIGHT: {name: "knight", chessNotation: "N", isChecked: false, color: null, hasMoved: false, availableMovements: ["x-1,y+2", "x+1,y+2", "x-1,y-2", "x+1,y-2", "x+2,y+1", "x-2,y+1", "x+2,y-1", "x-2,y-1"], position: {x: 0, y: 0}},
     BISHOP: {name: "bishop", chessNotation: "B", isChecked: false, color: null, hasMoved: false, availableMovements: ["diags"], position: {x: 0, y: 0}},
     QUEEN: {name: "queen", chessNotation: "Q", isChecked: false, color: null, hasMoved: false, availableMovements: ["lines", "diags"], position: {x: 0, y: 0}},
     KING: {name: "king", chessNotation: "K", isChecked: false, color: null, hasMoved: false, availableMovements: ["x+1", "x-1", "y+1", "y-1", "x+1,y+1", "x-1,y+1", "x-1,y-1", "x+1,y-1"], position: {x: 0, y: 0}},
@@ -36,8 +36,8 @@ export const DefaultBoard: Piece[][] = [
     { ...DefaultPieces.PAWN, color: CampColors.BLACK },
     { ...DefaultPieces.PAWN, color: CampColors.BLACK },
     { ...DefaultPieces.PAWN, color: CampColors.BLACK },
-    { ...DefaultPieces.PAWN, color: CampColors.BLACK },
-    { ...DefaultPieces.PAWN, color: CampColors.BLACK },
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
     { ...DefaultPieces.PAWN, color: CampColors.BLACK },
     { ...DefaultPieces.PAWN, color: CampColors.BLACK },
     { ...DefaultPieces.PAWN, color: CampColors.BLACK },
@@ -85,8 +85,8 @@ export const DefaultBoard: Piece[][] = [
   [
     { ...DefaultPieces.PAWN, color: CampColors.WHITE },
     { ...DefaultPieces.PAWN, color: CampColors.WHITE },
-    { ...DefaultPieces.PAWN, color: CampColors.WHITE },
-    { ...DefaultPieces.PAWN, color: CampColors.WHITE },
+    {...DefaultPieces.NONE},
+    {...DefaultPieces.NONE},
     { ...DefaultPieces.PAWN, color: CampColors.WHITE },
     { ...DefaultPieces.PAWN, color: CampColors.WHITE },
     { ...DefaultPieces.PAWN, color: CampColors.WHITE },
