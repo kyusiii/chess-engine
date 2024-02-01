@@ -383,14 +383,15 @@ export class Chess {
             type: MovementType.DEFAULT,
           };
 
-          if (!this.isOutOfBoard(move)) moves.push(move);
+          if (!this.isOutOfBoard(move) && this.getBoardCell(move.to).currentPiece.chessNotation == "-") moves.push(move);
+
         } else {
           const move = {
             to: { x: piece.position.x, y: piece.position.y - 2 },
             type: MovementType.DEFAULT,
           };
 
-          if (!this.isOutOfBoard(move)) moves.push(move);
+          if (!this.isOutOfBoard(move) && this.getBoardCell(move.to).currentPiece.chessNotation == "-") moves.push(move);
         }
       }
 
