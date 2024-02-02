@@ -13,10 +13,12 @@ import { State } from "./types/state";
 export class Chess {
   private board: Cell[][];
   private turn: CampColors;
+  private isGameOver: boolean;
 
   constructor() {
     this.board = this.generateNewBoard();
     this.turn = CampColors.WHITE;
+    this.isGameOver = false;
     this.calculeFirstAvailableMoves(true);
     this.updateAttackedCells();
   }
@@ -38,7 +40,7 @@ export class Chess {
           currentPiece: defaultPiece,
           position: { x: y, y: x },
           isAvailable: false,
-          isUnderAttack: false
+          isUnderAttack: false,
         };
 
         newBoard[x][y] = newCell;
@@ -68,14 +70,18 @@ export class Chess {
         cell.currentPiece.isChecked = false;
       }
     }
-    
+
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         let cell = this.getBoardCell({ x: x, y: y });
-        
-        if (cell.chessNotation == "-" || cell.currentPiece.color != this.turn) continue;
 
-        if (cell.currentPiece.calculateAvailableMovements && cell.currentPiece.calculateAvailableMovements.length > 0) {
+        if (cell.chessNotation == "-" || cell.currentPiece.color != this.turn)
+          continue;
+
+        if (
+          cell.currentPiece.calculateAvailableMovements &&
+          cell.currentPiece.calculateAvailableMovements.length > 0
+        ) {
           for (let move of cell.currentPiece.calculateAvailableMovements) {
             let nextCell = this.getBoardCell(move.to);
             nextCell.isUnderAttack = true;
@@ -94,10 +100,17 @@ export class Chess {
   }
 
   getState(): State {
+    let winner = this.isKingCheckmate();
+    if (winner) {
+      this.isGameOver = true;
+    }
+
     return {
       board: this.getBoard(),
-      turn: this.turn
-    }
+      turn: this.turn,
+      isGameOver: this.isGameOver,
+      winner: winner,
+    };
   }
 
   private getBoard(): Cell[][] {
@@ -137,22 +150,21 @@ export class Chess {
     console.log(toPrint);
   }
 
-  resetGame(): void {
-    this.board = this.generateNewBoard();
-  }
-
-  isKingCheckmate(): boolean {
+  isKingCheckmate(): CampColors | undefined {
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         let piece = this.board[y][x].currentPiece;
-        if (piece.chessNotation == "K") {
-          const moves = this.calculateAvailablesMoves(piece);
-          if (moves.length < 1) return true;
+        if (
+          piece.chessNotation == "K" &&
+          piece.calculateAvailableMovements &&
+          piece.color
+        ) {
+          if (piece.calculateAvailableMovements.length < 1) return piece.color;
         }
       }
     }
 
-    return false;
+    return undefined;
   }
 
   isOppositeKingChecked(enemyColor: CampColors): boolean {
@@ -167,7 +179,7 @@ export class Chess {
 
     return false;
   }
- 
+
   calculateAvailablesMoves(piece: Piece): Movement[] {
     let moves: Movement[] = [];
 
@@ -315,12 +327,21 @@ export class Chess {
           if (piece.chessNotation == "P") {
             let nextFrontCell: Cell;
             if (piece.color == CampColors.BLACK) {
-              nextFrontCell = this.getBoardCell({x: piece.position.x, y: piece.position.y + 1});
+              nextFrontCell = this.getBoardCell({
+                x: piece.position.x,
+                y: piece.position.y + 1,
+              });
+            } else {
+              nextFrontCell = this.getBoardCell({
+                x: piece.position.x,
+                y: piece.position.y - 1,
+              });
             }
-            else {
-              nextFrontCell = this.getBoardCell({x: piece.position.x, y: piece.position.y - 1});
-            }
-            if (nextFrontCell.currentPiece.chessNotation != "-" && nextFrontCell.currentPiece.color != piece.color) { //if next front cell of pawn has enemy piece
+            if (
+              nextFrontCell.currentPiece.chessNotation != "-" &&
+              nextFrontCell.currentPiece.color != piece.color
+            ) {
+              //if next front cell of pawn has enemy piece
               break;
             }
           }
@@ -383,15 +404,22 @@ export class Chess {
             type: MovementType.DEFAULT,
           };
 
-          if (!this.isOutOfBoard(move) && this.getBoardCell(move.to).currentPiece.chessNotation == "-") moves.push(move);
-
+          if (
+            !this.isOutOfBoard(move) &&
+            this.getBoardCell(move.to).currentPiece.chessNotation == "-"
+          )
+            moves.push(move);
         } else {
           const move = {
             to: { x: piece.position.x, y: piece.position.y - 2 },
             type: MovementType.DEFAULT,
           };
 
-          if (!this.isOutOfBoard(move) && this.getBoardCell(move.to).currentPiece.chessNotation == "-") moves.push(move);
+          if (
+            !this.isOutOfBoard(move) &&
+            this.getBoardCell(move.to).currentPiece.chessNotation == "-"
+          )
+            moves.push(move);
         }
       }
 
@@ -425,7 +453,7 @@ export class Chess {
       hasMoved: piece.hasMoved,
       isChecked: piece.isChecked,
       position: piece.position,
-      calculateAvailableMovements: piece.calculateAvailableMovements
+      calculateAvailableMovements: piece.calculateAvailableMovements,
     };
 
     let currentCell = this.getBoardCell(piece.position);
@@ -436,10 +464,10 @@ export class Chess {
 
     targetCell.currentPiece = piece;
     currentCell.currentPiece = { ...DefaultPieces.NONE, color: null };
-    
+
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
-        let cell = this.getBoardCell({x: x, y: y});
+        let cell = this.getBoardCell({ x: x, y: y });
         this.calculateAvailablesMoves(cell.currentPiece);
       }
     }
@@ -448,20 +476,27 @@ export class Chess {
 
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
-        let cell = this.getBoardCell({x: x, y: y});
+        let cell = this.getBoardCell({ x: x, y: y });
         this.calculateAvailablesMoves(cell.currentPiece);
       }
     }
 
-    let isOppositeKingChecked = this.isOppositeKingChecked(piece.color == CampColors.BLACK ? CampColors.WHITE: CampColors.BLACK);
+    let isOppositeKingChecked = this.isOppositeKingChecked(
+      piece.color == CampColors.BLACK ? CampColors.WHITE : CampColors.BLACK
+    );
 
     if (isOppositeKingChecked) {
       // get positions that can break check
-      let breakCheckPositions:Position[] = [];
-      let mov = unmutablePiece.calculateAvailableMovements?.find(m => this.isEqualPositions(m.to, to));
+      let breakCheckPositions: Position[] = [];
+      let mov = unmutablePiece.calculateAvailableMovements?.find((m) =>
+        this.isEqualPositions(m.to, to)
+      );
       if (unmutablePiece.color == null) return;
 
-      let king = this.getPieceByNotation("K", this.getOppositeColor(unmutablePiece.color));
+      let king = this.getPieceByNotation(
+        "K",
+        this.getOppositeColor(unmutablePiece.color)
+      );
       if (!king) {
         console.error("King not found");
         return;
@@ -474,73 +509,102 @@ export class Chess {
         return;
       }
 
-      let movVector = {x: mov.to.x - king.position.x, y: mov.to.y - king.position.y };
+      let movVector = {
+        x: mov.to.x - king.position.x,
+        y: mov.to.y - king.position.y,
+      };
 
       if (movVector.x > 0 && movVector.y > 0) {
         //check diag right back of the king
-        for (let i=king.position.x + 1; i <= movVector.x; i++) {
-          let checkPos: Position = {x: king.position.x + i, y: king.position.y + i};
+        for (let i = king.position.x + 1; i <= movVector.x; i++) {
+          let checkPos: Position = {
+            x: king.position.x + i,
+            y: king.position.y + i,
+          };
           breakCheckPositions.push(checkPos);
         }
-      }
-      else if (movVector.x > 0 && movVector.y < 0) {
+      } else if (movVector.x > 0 && movVector.y < 0) {
         //check diag left back of the king
-        for (let i=king.position.x + 1; i <= movVector.x; i++) {
-          let checkPos: Position = {x: king.position.x + i, y: king.position.y - i};
+        for (let i = king.position.x + 1; i <= movVector.x; i++) {
+          let checkPos: Position = {
+            x: king.position.x + i,
+            y: king.position.y - i,
+          };
           breakCheckPositions.push(checkPos);
         }
-      }
-      else if (movVector.x < 0 && movVector.y > 0) {
+      } else if (movVector.x < 0 && movVector.y > 0) {
         //check diag right forward of the king
-        for (let i=king.position.y + 1; i <= movVector.y; i++) {
-          let checkPos: Position = {x: king.position.x - i, y: king.position.y + i};
+        for (let i = king.position.y + 1; i <= movVector.y; i++) {
+          let checkPos: Position = {
+            x: king.position.x - i,
+            y: king.position.y + i,
+          };
           breakCheckPositions.push(checkPos);
         }
-      }
-      else if (movVector.x < 0 && movVector.y < 0) {
+      } else if (movVector.x < 0 && movVector.y < 0) {
         //check diag left forward of the king
-        for (let i=king.position.x + 1; i >= movVector.x; i--) {
-          let checkPos: Position = {x: king.position.x - i, y: king.position.y - i};
+        for (let i = king.position.x + 1; i >= movVector.x; i--) {
+          let checkPos: Position = {
+            x: king.position.x - i,
+            y: king.position.y - i,
+          };
           breakCheckPositions.push(checkPos);
         }
-      }
-      else if (movVector.x == 0 && movVector.y < 0) {
+      } else if (movVector.x == 0 && movVector.y < 0) {
         //check left of the king
-        for (let i=king.position.y + 1; i >= movVector.y; i--) {
-          let checkPos: Position = {x: king.position.x, y: king.position.y - i};
+        for (let i = king.position.y + 1; i >= movVector.y; i--) {
+          let checkPos: Position = {
+            x: king.position.x,
+            y: king.position.y - i,
+          };
           breakCheckPositions.push(checkPos);
         }
-      }
-      else if (movVector.x == 0 && movVector.y > 0) {
+      } else if (movVector.x == 0 && movVector.y > 0) {
         //check right of the king
-        for (let i=king.position.y + 1; i <= movVector.y; i++) {
-          let checkPos: Position = {x: king.position.x, y: king.position.y + i};
+        for (let i = king.position.y + 1; i <= movVector.y; i++) {
+          let checkPos: Position = {
+            x: king.position.x,
+            y: king.position.y + i,
+          };
           breakCheckPositions.push(checkPos);
         }
-      }
-      else if (movVector.x < 0 && movVector.y == 0) {
+      } else if (movVector.x < 0 && movVector.y == 0) {
         //check top of the king
-        for (let i=king.position.x + 1; i >= movVector.x; i--) {
-          let checkPos: Position = {x: king.position.x - i, y: king.position.y};
+        for (let i = king.position.x + 1; i >= movVector.x; i--) {
+          let checkPos: Position = {
+            x: king.position.x - i,
+            y: king.position.y,
+          };
           breakCheckPositions.push(checkPos);
         }
-      }
-      else if (movVector.x > 0 && movVector.y == 0) {
+      } else if (movVector.x > 0 && movVector.y == 0) {
         //check bottom of the king
-        for (let i=king.position.x + 1; i <= movVector.x; i++) {
-          let checkPos: Position = {x: king.position.x + i, y: king.position.y};
+        for (let i = king.position.x + 1; i <= movVector.x; i++) {
+          let checkPos: Position = {
+            x: king.position.x + i,
+            y: king.position.y,
+          };
           breakCheckPositions.push(checkPos);
         }
       }
 
       for (let x = 0; x < BoardDimensions.x; x++) {
         for (let y = 0; y < BoardDimensions.y; y++) {
-          let cell = this.getBoardCell({x: x, y: y});
-          if (cell.currentPiece.chessNotation == "-" || cell.currentPiece.chessNotation == "K" || piece.color == null) continue;
+          let cell = this.getBoardCell({ x: x, y: y });
+          if (
+            cell.currentPiece.chessNotation == "-" ||
+            cell.currentPiece.chessNotation == "K" ||
+            piece.color == null
+          )
+            continue;
 
           if (cell.currentPiece.color == this.getOppositeColor(piece.color)) {
-            cell.currentPiece.calculateAvailableMovements = cell.currentPiece.calculateAvailableMovements
-              ?.filter(mov => breakCheckPositions.find(pos => this.isEqualPositions(mov.to, pos)));
+            cell.currentPiece.calculateAvailableMovements =
+              cell.currentPiece.calculateAvailableMovements?.filter((mov) =>
+                breakCheckPositions.find((pos) =>
+                  this.isEqualPositions(mov.to, pos)
+                )
+              );
           }
         }
       }
@@ -555,13 +619,13 @@ export class Chess {
     let cell = this.getBoardCell(move.to);
 
     if (this.isEqualPositions(move.to, piece.position)) return false;
-    
+
     if (
       cell.currentPiece.chessNotation != "-" &&
       cell.currentPiece.color == piece.color
     )
       return false;
-    
+
     if (cell.isUnderAttack && piece.chessNotation == "K") return false;
 
     return true;
@@ -589,7 +653,10 @@ export class Chess {
   getPieceByNotation(notation: string, color: CampColors): Piece | null {
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
-        if (this.board[y][x].currentPiece.chessNotation == notation && this.board[y][x].currentPiece.color == color)
+        if (
+          this.board[y][x].currentPiece.chessNotation == notation &&
+          this.board[y][x].currentPiece.color == color
+        )
           return this.board[y][x].currentPiece;
       }
     }

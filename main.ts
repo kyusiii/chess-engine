@@ -8,4 +8,6 @@ let piece = game.getBoardCell(pos).currentPiece;
 game.printBoard();
 game.movePiece(piece, targetPos);
 game.printBoard();
-console.log(game.getBoardCell({x: 3, y:0}).currentPiece.calculateAvailableMovements)
+console.log(
+  game.getBoardCell({ x: 3, y: 0 }).currentPiece.calculateAvailableMovements
+);
