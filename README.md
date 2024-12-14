@@ -18,15 +18,15 @@ let game = new Chess();
 ```
 ## Index of cells are mades as this :
 ```
- 1 2 3 4 5 6 7 8
-A 1            
-B
-C
-D
-E
-F
-G
-H 7
+ A B C D E F G H
+7
+6
+5
+4
+3
+2
+1
+0
 ```
 ## Move piece like this :
 ```
