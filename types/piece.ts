@@ -7,7 +7,7 @@ export type Piece = {
     chessNotation: string;
     position: Position;
     availableMovements: string[];
-    calculateAvailableMovements?: Movement[];
+    calculatedAvailableMovements?: Movement[];
     color: CampColors | null;
     hasMoved: boolean;
     isChecked: boolean;

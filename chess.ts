@@ -79,10 +79,10 @@ export class Chess {
           continue;
 
         if (
-          cell.currentPiece.calculateAvailableMovements &&
-          cell.currentPiece.calculateAvailableMovements.length > 0
+          cell.currentPiece.calculatedAvailableMovements &&
+          cell.currentPiece.calculatedAvailableMovements.length > 0
         ) {
-          for (let move of cell.currentPiece.calculateAvailableMovements) {
+          for (let move of cell.currentPiece.calculatedAvailableMovements) {
             let nextCell = this.getBoardCell(move.to);
             nextCell.isUnderAttack = true;
 
@@ -100,9 +100,9 @@ export class Chess {
   }
 
   getState(): State {
-    let winner = this.isKingCheckmate();
-    if (winner) {
-      this.isGameOver = true;
+    let winner;
+    if (this.isGameOver) {
+      winner = this.getOppositeColor(this.turn);
     }
 
     return {
@@ -148,23 +148,6 @@ export class Chess {
     }
 
     console.log(toPrint);
-  }
-
-  isKingCheckmate(): CampColors | undefined {
-    for (let x = 0; x < BoardDimensions.x; x++) {
-      for (let y = 0; y < BoardDimensions.y; y++) {
-        let piece = this.board[y][x].currentPiece;
-        if (
-          piece.chessNotation == "K" &&
-          piece.calculateAvailableMovements &&
-          piece.color
-        ) {
-          if (piece.calculateAvailableMovements.length < 1) return piece.color;
-        }
-      }
-    }
-
-    return undefined;
   }
 
   isOppositeKingChecked(enemyColor: CampColors): boolean {
@@ -429,15 +412,20 @@ export class Chess {
       }
     }
 
-    piece.calculateAvailableMovements = moves;
+    piece.calculatedAvailableMovements = moves;
 
     return moves;
   }
 
   movePiece(piece: Piece, to: Position) {
+    if (this.isGameOver) {
+      console.log("Game is done");
+      return;
+    }
+
     if (
-      piece.calculateAvailableMovements &&
-      piece.calculateAvailableMovements.find((t) =>
+      piece.calculatedAvailableMovements &&
+      piece.calculatedAvailableMovements.find((t) =>
         this.isEqualPositions(t.to, to)
       ) == undefined
     ) {
@@ -453,7 +441,7 @@ export class Chess {
       hasMoved: piece.hasMoved,
       isChecked: piece.isChecked,
       position: piece.position,
-      calculateAvailableMovements: piece.calculateAvailableMovements,
+      calculatedAvailableMovements: piece.calculatedAvailableMovements,
     };
 
     let currentCell = this.getBoardCell(piece.position);
@@ -485,10 +473,10 @@ export class Chess {
       piece.color == CampColors.BLACK ? CampColors.WHITE : CampColors.BLACK
     );
 
+    let breakCheckPositions: Position[] = [];
     if (isOppositeKingChecked) {
       // get positions that can break check
-      let breakCheckPositions: Position[] = [];
-      let mov = unmutablePiece.calculateAvailableMovements?.find((m) =>
+      let mov = unmutablePiece.calculatedAvailableMovements?.find((m) =>
         this.isEqualPositions(m.to, to)
       );
       if (unmutablePiece.color == null) return;
@@ -588,6 +576,8 @@ export class Chess {
         }
       }
 
+      this.isGameOver = true;
+
       for (let x = 0; x < BoardDimensions.x; x++) {
         for (let y = 0; y < BoardDimensions.y; y++) {
           let cell = this.getBoardCell({ x: x, y: y });
@@ -599,12 +589,17 @@ export class Chess {
             continue;
 
           if (cell.currentPiece.color == this.getOppositeColor(piece.color)) {
-            cell.currentPiece.calculateAvailableMovements =
-              cell.currentPiece.calculateAvailableMovements?.filter((mov) =>
+            cell.currentPiece.calculatedAvailableMovements =
+              cell.currentPiece.calculatedAvailableMovements?.filter((mov) =>
                 breakCheckPositions.find((pos) =>
                   this.isEqualPositions(mov.to, pos)
                 )
               );
+            
+            // If a movement can break the check, game is not over
+            if (cell.currentPiece.calculatedAvailableMovements && cell.currentPiece.calculatedAvailableMovements.length > 0) {
+              this.isGameOver = false;
+            }
           }
         }
       }
