@@ -1,6 +1,43 @@
 {
+  "name": "chess-engine-class",
+  "version": "1.0.1",
+  "author": "mbrevot@gmail.com",
+  "license": "ISC",
+  "main": "chess.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kyusiii/chess-engine.git"
+  },
+  "description": "Chess engine that will handle the board creation, the move of pieces and the checkmate",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "compilerOptions": {
+    "outDir": "./dist",
+    "module": "CommonJS",
+    "target": "ES2019",
+    "declaration": true,
+    "sourceMap": true,
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "scripts": {
+    "dev": "npx ts-node chess.ts",
+    "build": "tsc"
+  },
+  "keywords": [
+    "typescript",
+    "nodejs",
+    "module"
+  ],
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
   "dependencies": {
-    "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "ts-node": "^10.9.2"
   }
 }

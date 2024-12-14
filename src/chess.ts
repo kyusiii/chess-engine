@@ -1,14 +1,14 @@
-import { Cell } from "./types/cell";
+import { Cell } from "../types/cell";
 import {
   BoardDimensions,
   CampColors,
   DefaultBoard,
   DefaultPieces,
 } from "./constants";
-import { Piece } from "./types/piece";
-import { Position } from "./types/position";
-import { Movement, MovementType } from "./types/movement";
-import { State } from "./types/state";
+import { Piece } from "../types/piece";
+import { Position } from "../types/position";
+import { Movement, MovementType } from "../types/movement";
+import { State } from "../types/state";
 
 export class Chess {
   private board: Cell[][];
@@ -52,7 +52,7 @@ export class Chess {
     return newBoard;
   }
 
-  calculeFirstAvailableMoves(isInit: boolean = false) {
+  private calculeFirstAvailableMoves(isInit: boolean = false) {
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         let cell = this.getBoardCell({ x: x, y: y });
@@ -62,7 +62,7 @@ export class Chess {
     }
   }
 
-  updateAttackedCells() {
+  private updateAttackedCells() {
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         let cell = this.getBoardCell({ x: x, y: y });
@@ -113,7 +113,7 @@ export class Chess {
     };
   }
 
-  private getBoard(): Cell[][] {
+  getBoard(): Cell[][] {
     return this.board;
   }
 
@@ -150,7 +150,7 @@ export class Chess {
     console.log(toPrint);
   }
 
-  isOppositeKingChecked(enemyColor: CampColors): boolean {
+  private isOppositeKingChecked(enemyColor: CampColors): boolean {
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         let piece = this.board[y][x].currentPiece;
@@ -163,7 +163,7 @@ export class Chess {
     return false;
   }
 
-  calculateAvailablesMoves(piece: Piece): Movement[] {
+  private calculateAvailablesMoves(piece: Piece): Movement[] {
     let moves: Movement[] = [];
 
     piece.availableMovements.forEach((mov: string) => {
@@ -595,7 +595,7 @@ export class Chess {
                   this.isEqualPositions(mov.to, pos)
                 )
               );
-            
+
             // If a movement can break the check, game is not over
             if (cell.currentPiece.calculatedAvailableMovements && cell.currentPiece.calculatedAvailableMovements.length > 0) {
               this.isGameOver = false;
@@ -645,7 +645,7 @@ export class Chess {
     return this.board[position.y][position.x];
   }
 
-  getPieceByNotation(notation: string, color: CampColors): Piece | null {
+  private getPieceByNotation(notation: string, color: CampColors): Piece | null {
     for (let x = 0; x < BoardDimensions.x; x++) {
       for (let y = 0; y < BoardDimensions.y; y++) {
         if (

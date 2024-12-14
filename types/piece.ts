@@ -1,4 +1,4 @@
-import { CampColors } from "../constants";
+import { CampColors } from "../src/constants";
 import { Movement } from "./movement";
 import { Position } from "./position";
 

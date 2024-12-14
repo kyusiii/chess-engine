@@ -1,4 +1,4 @@
-import { Piece } from "./types/piece";
+import { Piece } from "../types/piece";
 
 export enum CampColors {
   WHITE,

@@ -1,4 +1,4 @@
-import { CampColors } from "../constants";
+import { CampColors } from "../src/constants";
 import { Cell } from "./cell";
 
 export type State = {

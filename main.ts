@@ -1,4 +1,7 @@
-import { Chess } from "./chess";
+// this file is for debug purpose only
+// utilisation of this module should only be from chess.ts
+
+import { Chess } from "./src/chess";
 
 let pos = { x: 3, y: 7 };
 let targetPos = { x: 4, y: 6 };
