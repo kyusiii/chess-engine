@@ -1,6 +1,6 @@
 {
   "name": "chess-engine-class",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "author": "mbrevot@gmail.com",
   "license": "ISC",
   "main": "chess.js",
@@ -28,7 +28,8 @@
   "keywords": [
     "typescript",
     "nodejs",
-    "module"
+    "module",
+    "chess"
   ],
   "include": [
     "src/**/*"
